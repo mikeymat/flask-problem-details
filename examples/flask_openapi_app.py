@@ -18,6 +18,5 @@ def get_books():
     extras : dict = {"one": "extra value"}
     raise from_exception(NotImplementedError(description), extras = extras)
 
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
