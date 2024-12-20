@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "./examples/flask_openapi_app.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Flask",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./examples/flask_app.py",
+            "console": "integratedTerminal"
         }
     ]
 }
