@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: flask-problem-details
-Version: 0.0.5
+Version: 1.0.0
 Summary: A package that implements problem details errors in Flask App
 Author: Michelangelo Matina
 Classifier: Programming Language :: Python :: 3
@@ -36,52 +36,55 @@ pip install flask-problem-details
 ## Usage
 
 ### 1. Configure the Application
+
 ```python
 from flask_openapi3 import OpenAPI, Info
-from controller.asset import controller as asset_controller
-
-from flask_problem_details import configure_app
+from flask_problem_details import configure_app, from_exception
+from werkzeug.exceptions import NotImplemented
 
 # OpenAPI information
 info: Info = Info(title="Flask OpenAPI 3 Example", version="1.0.0")
 openapi_builder : OpenAPI = lambda args : OpenAPI(__name__, info=info, **args)
 
-app : OpenAPI = configure_app(app_builder = openapi_builder, with_traceback=False)
+app : OpenAPI = configure_app(app_builder = openapi_builder, with_traceback=True)
 
-app.register_api(asset_controller)
+@app.get("/authors")
+def get_authors():
+    raise NotImplemented()
+
+@app.get("/books")
+def get_books():
+    description: str = "The method is not implemented"
+    raise from_exception(NotImplementedError(description))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
 ```
-### 2. Raise the Problem
-```python
-from flask_openapi3 import Tag, APIBlueprint
-from model.asset import AssetUploadParameters
-from flask_problem_details import ProblemDetailsError
-from werkzeug.exceptions import ExpectationFailed
 
-tag = Tag(name="Asset", description="Asset controller")
-controller = APIBlueprint('/assets', __name__, url_prefix='/', abp_tags=[tag], doc_ui=True)
-
-@controller.post("upload/1/")
-def upload_first(query: AssetUploadParameters):
-    raise ProblemDetailsError.from_exception(ValueError("test"))
-
-@controller.post("upload/2/")
-def upload_second(query: AssetUploadParameters):
-    raise ExpectationFailed()
-```
-
-### 3. Error Response Example
+### 2. Error Response Example
 When an error occurs, the module returns a JSON response similar to:
+#### GET /authors
 ```json
 {
-  "status": 417,
-  "title": "ExpectationFailed",
-  "detail": "The server could not meet the requirements of the Expect header",
-  "type": "ExpectationFailed",
-  "traceback": null,
+  "status": 501,
+  "title": "NotImplemented",
+  "detail": "The server does not support the action requested by the browser.",
+  "type": "NotImplemented",
+  "traceback": "Traceback (most recent call last)...",
   "extras": {}
+}
+```
+#### GET /books
+```json
+{
+  "status": 500,
+  "title": "InternalServerError",
+  "detail": "The method is not implemented",
+  "type": "NotImplementedError",
+  "traceback": "Traceback (most recent call last):...",
+  "extras": {
+    "one": "extra value"
+  }
 }
 ```
 
@@ -89,14 +92,16 @@ When an error occurs, the module returns a JSON response similar to:
 
 ## Core Components
 
-### **Error Classes**
+### **Classes**
 1. **`ProblemDetails`**: A Pydantic model representing the structure of an error response.
 2. **`ProblemDetailsError`**: Custom exception class for handling problems.
 
 
-### **Configuration Functions**
+### **Functions**
 - `configure_app(app_builder, with_traceback=False)`: Sets up the application with error handling.
 - `activate_traceback() / deactivate_traceback()`: Enable or disable traceback inclusion.
+- `from_exception(exception, extras)`: create a ProblemDetailsErrors from an exception.
+
 
 ---
 
@@ -105,7 +110,7 @@ To add custom error handling, register additional error handlers using Flask's `
 ```python
 @app.errorhandler(CustomException)
 def handle_custom_exception(e):
-    return ProblemDetailsError.from_exception(e).to_http_response()
+    return from_exception(e).to_http_response()
 ```
 
 ---
@@ -116,7 +121,7 @@ This module is provided under the MIT License.
 ---
 
 ## Contributions
-Contributions are welcome! Submit a pull request or open an issue on GitHub.
+Contributions are welcome! Submit a pull request or open an issue on [GitHub](https://github.com/mikeymat/flask-problem-details).
 
 ---
 
