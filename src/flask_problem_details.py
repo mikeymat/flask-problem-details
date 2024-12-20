@@ -36,7 +36,7 @@ def configure_app(app_builder: callable[Union[Flask,OpenAPI]], with_traceback: b
             :type error: ValidationError
         """
         bad_request_exception = BadRequest(f"Validation Failed! Error count: {error.error_count()}")
-        return handle(from_exception(bad_request_exception, extras = error.errors()))
+        return handle(from_exception(bad_request_exception, extras = {"errors": error.errors()}))
     def handle_exception(error: Exception):
         """
             Handle any error
