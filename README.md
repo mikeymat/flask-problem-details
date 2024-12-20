@@ -41,7 +41,8 @@ def get_authors():
 @app.get("/books")
 def get_books():
     description: str = "The method is not implemented"
-    raise from_exception(NotImplementedError(description))
+    extras : dict = {"one": "extra value"}
+    raise from_exception(NotImplementedError(description), extras = extras)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
