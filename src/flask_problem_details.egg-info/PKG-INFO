@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: flask-problem-details
-Version: 1.0.1
+Version: 1.0.2
 Summary: A package that implements problem details errors in Flask App
 Author: Michelangelo Matina
 Classifier: Programming Language :: Python :: 3

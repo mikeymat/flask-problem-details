@@ -97,7 +97,8 @@ To add custom error handling, register additional error handlers using Flask's `
 ```python
 @app.errorhandler(CustomException)
 def handle_custom_exception(e):
-    return from_exception(e).to_http_response()
+    http_exception = PreconditionFailed(str(e))
+    return from_exception(http_exception).to_http_response()
 ```
 
 ---
