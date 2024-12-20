@@ -1,3 +1,17 @@
+Metadata-Version: 2.1
+Name: flask-problem-details
+Version: 0.0.5
+Summary: A package that implements problem details errors in Flask App
+Author: Michelangelo Matina
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: flask-openapi3>=4.0.3
+Requires-Dist: pydantic>=2.10.4
+
 # Flask OpenAPI Error Handling Module
 
 ## Overview
@@ -22,56 +36,52 @@ pip install flask-problem-details
 ## Usage
 
 ### 1. Configure the Application
-
 ```python
 from flask_openapi3 import OpenAPI, Info
-from flask_problem_details import configure_app, from_exception
-from werkzeug.exceptions import NotImplemented
+from controller.asset import controller as asset_controller
+
+from flask_problem_details import configure_app
 
 # OpenAPI information
 info: Info = Info(title="Flask OpenAPI 3 Example", version="1.0.0")
 openapi_builder : OpenAPI = lambda args : OpenAPI(__name__, info=info, **args)
 
-app : OpenAPI = configure_app(app_builder = openapi_builder, with_traceback=True)
+app : OpenAPI = configure_app(app_builder = openapi_builder, with_traceback=False)
 
-@app.get("/authors")
-def get_authors():
-    raise NotImplemented()
-
-@app.get("/books")
-def get_books():
-    description: str = "The method is not implemented"
-    raise from_exception(NotImplementedError(description))
-
+app.register_api(asset_controller)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
 ```
+### 2. Raise the Problem
+```python
+from flask_openapi3 import Tag, APIBlueprint
+from model.asset import AssetUploadParameters
+from flask_problem_details import ProblemDetailsError
+from werkzeug.exceptions import ExpectationFailed
 
-### 2. Error Response Example
-When an error occurs, the module returns a JSON response similar to:
-#### GET /authors
-```json
-{
-  "status": 501,
-  "title": "NotImplemented",
-  "detail": "The server does not support the action requested by the browser.",
-  "type": "NotImplemented",
-  "traceback": "Traceback (most recent call last)...",
-  "extras": {}
-}
+tag = Tag(name="Asset", description="Asset controller")
+controller = APIBlueprint('/assets', __name__, url_prefix='/', abp_tags=[tag], doc_ui=True)
+
+@controller.post("upload/1/")
+def upload_first(query: AssetUploadParameters):
+    raise ProblemDetailsError.from_exception(ValueError("test"))
+
+@controller.post("upload/2/")
+def upload_second(query: AssetUploadParameters):
+    raise ExpectationFailed()
 ```
-#### GET /books
+
+### 3. Error Response Example
+When an error occurs, the module returns a JSON response similar to:
 ```json
 {
-  "status": 500,
-  "title": "InternalServerError",
-  "detail": "The method is not implemented",
-  "type": "NotImplementedError",
-  "traceback": "Traceback (most recent call last):...",
-  "extras": {
-    "one": "extra value"
-  }
+  "status": 417,
+  "title": "ExpectationFailed",
+  "detail": "The server could not meet the requirements of the Expect header",
+  "type": "ExpectationFailed",
+  "traceback": null,
+  "extras": {}
 }
 ```
 
@@ -79,16 +89,14 @@ When an error occurs, the module returns a JSON response similar to:
 
 ## Core Components
 
-### **Classes**
+### **Error Classes**
 1. **`ProblemDetails`**: A Pydantic model representing the structure of an error response.
 2. **`ProblemDetailsError`**: Custom exception class for handling problems.
 
 
-### **Functions**
+### **Configuration Functions**
 - `configure_app(app_builder, with_traceback=False)`: Sets up the application with error handling.
 - `activate_traceback() / deactivate_traceback()`: Enable or disable traceback inclusion.
-- `from_exception(exception, extras)`: create a ProblemDetailsErrors from an exception.
-
 
 ---
 
@@ -97,7 +105,7 @@ To add custom error handling, register additional error handlers using Flask's `
 ```python
 @app.errorhandler(CustomException)
 def handle_custom_exception(e):
-    return from_exception(e).to_http_response()
+    return ProblemDetailsError.from_exception(e).to_http_response()
 ```
 
 ---
@@ -108,7 +116,7 @@ This module is provided under the MIT License.
 ---
 
 ## Contributions
-Contributions are welcome! Submit a pull request or open an issue on [GitHub](https://github.com/mikeymat/flask-problem-details).
+Contributions are welcome! Submit a pull request or open an issue on GitHub.
 
 ---
 
