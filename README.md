@@ -34,7 +34,7 @@ from flask_problem_details import configure_app, from_exception, ProblemDetails,
 
 # OpenAPI information
 info: Info = Info(title="Flask OpenAPI 3 Example", version="1.0.0")
-openapi_callback: Callable[[dict], OpenAPI] = lambda args : OpenAPI(__name__, info=info, **args)
+openapi_callback = lambda args : OpenAPI(__name__, info=info, **args)
 
 app : OpenAPI = configure_app(app = openapi_callback, with_traceback=True)
 
@@ -50,8 +50,13 @@ def get_books():
 
 @app.get("/cats")
 def get_cats():
-    problem = ProblemDetails(status=412, title = "No shelter", type= "uri:localhost:noshelter")
-    raise ProblemDetailsError(problem)
+    raise ProblemDetailsError(
+        ProblemDetails(
+            status=412, 
+            title="No shelter", 
+            type= "uri:localhost:noshelter"
+        )
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
