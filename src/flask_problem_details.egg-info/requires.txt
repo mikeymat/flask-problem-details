@@ -1,2 +1,0 @@
-flask-openapi3>=4.0.3
-pydantic>=2.10.4
