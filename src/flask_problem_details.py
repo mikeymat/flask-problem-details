@@ -28,7 +28,7 @@ def configure_app(app: Union[Flask, Callable[[dict],OpenAPI]], with_traceback: b
 
     Parameters
     ----------
-    app : Union[Flask, function[OpenAPI]]
+    app : Union[Flask, Callable[[dict],OpenAPI]]
         The Flask or OpenAPI application instance to configure.
     with_traceback : bool, optional
         If True, include traceback information in the problem details (default is False).
@@ -209,4 +209,4 @@ class ProblemDetailsError(Exception):
             The problem details as an HTTP response.
         """
         with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback
-        return Response(status=self.problem.status, response=self.to_json(with_traceback), mimetype="application/json")
+        return Response(status=self.problem.status, response=self.to_json(with_traceback), mimetype="application/problem+json")

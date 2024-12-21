@@ -5,7 +5,7 @@ from pydantic_core import ValidationError
 from werkzeug.exceptions import BadRequest, InternalServerError
 from pydantic import BaseModel
 
-import src.flask_problem_details as problem
+import flask_problem_details as problem
 
 class TestFlaskProblemDetails(unittest.TestCase):
 
