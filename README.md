@@ -26,11 +26,10 @@ pip install flask-problem-details
 
 ```python
 from flask_openapi3 import OpenAPI, Info
-from pydantic import BaseModel
 from werkzeug.exceptions import NotImplemented
-from typing import Callable
-
-from flask_problem_details import configure_app, from_exception, ProblemDetails, ProblemDetailsError
+from flask_problem_details import (
+    configure_app, from_exception, ProblemDetails, ProblemDetailsError
+)
 
 # OpenAPI information
 info: Info = Info(title="Flask OpenAPI 3 Example", version="1.0.0")
