@@ -73,26 +73,30 @@ def from_exception(exception: Exception, extras: dict = {}) -> ProblemDetailsErr
     
     :rtype ProblemDetailsError
     """
-    
-    status : int = InternalServerError.code
-    title: str = InternalServerError.__name__
-    detail : str = str(exception)
-    type :str = exception.__class__.__name__
+    model = ProblemDetails(
+        status=InternalServerError.code,
+        title= InternalServerError.__name__,
+        detail= str(exception),
+        type=exception.__class__.__name__,
+        **extras
+    )
     
     if isinstance(exception, HTTPException):
-        status = exception.code
-        title = exception.__class__.__name__
-        detail = exception.description
+        model.status = exception.code
+        model.title = exception.__class__.__name__
+        model.detail = exception.description
     
-    return ProblemDetailsError(status=status, title= title, detail=detail, type = type, exception=exception, **extras)
+    return ProblemDetailsError(exception=exception, **model.model_dump())
 
-class ProblemDetails(BaseModel):
+def from_model(model : ProblemDetails) -> ProblemDetailsError:
+    return ProblemDetailsError(**model.model_dump())
+
+class ProblemDetails(BaseModel, extra="allow"):
     status: int = Field(..., description = "HTTP status code")
     title: str = Field(..., description = "A short, human-readable summary of the problem type")
     detail: str = Field(..., description = "An human readable explanation specific to this occurrence of the problem")
     type: str = Field(..., description = "An absolute URI that identifies the problem type")
-    traceback : str = Field(None, description = "The stack trace of the problem")
-    extras : dict = Field(None, description="An object with extra information")
+    traceback : Union[str|None] = Field(None, description = "The stack trace of the problem")
     
 class ProblemDetailsError(Exception):
 
@@ -112,7 +116,7 @@ class ProblemDetailsError(Exception):
                      present its value is assumed to be "about:blank".
         :type: type: str
         """
-        self.problem = ProblemDetails(status=status, title=title, detail=detail, type=type, extras=kwargs)
+        self.problem = ProblemDetails(status=status, title=title, detail=detail, type=type, **kwargs)
         self.inner_exception : Exception = exception
      
         
@@ -148,4 +152,4 @@ class ProblemDetailsError(Exception):
 
     def to_http_response(self, with_traceback: bool = None) -> Response:
         with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback
-        return Response(status=self.problem.status, response=self.to_json(), mimetype="application/json")
+        return Response(status=self.problem.status, response=self.to_json(with_traceback), mimetype="application/json")
