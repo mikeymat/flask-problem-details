@@ -20,3 +20,7 @@ dependencies = [
   "flask-openapi3>=4.0.3",
   "pydantic>=2.10.4"
 ]
+
+[project.urls]
+Homepage = "https://github.com/mikeymat/flask-problem-details"
+Issues = "https://github.com/mikeymat/flask-problem-details/issues"

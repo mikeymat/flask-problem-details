@@ -1,3 +1,6 @@
+pytest==6.2.5
 flask-openapi3==4.0.3
 flask-openapi3-scalar==1.25.91
 pydantic==2.10.4
+Flask==3.1.0
+Werkzeug==3.1.3

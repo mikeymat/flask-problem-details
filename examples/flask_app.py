@@ -1,9 +1,8 @@
 from flask import Flask
-from flask_problem_details import configure_app, from_exception, ProblemDetails, ProblemDetailsError
 from werkzeug.exceptions import NotImplemented
+from flask_problem_details import configure_app, from_exception, ProblemDetails, ProblemDetailsError
 
-flask_builder : Flask = lambda args: Flask(__name__)
-app : Flask = configure_app(app_builder = flask_builder, with_traceback=True)
+app : Flask = configure_app(Flask(__name__), with_traceback=True)
 
 @app.get("/authors")
 def get_authors():
