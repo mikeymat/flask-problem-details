@@ -1,7 +1,8 @@
-# Flask OpenAPI Error Handling Module
+# Flask Problem Details Package
+
 
 ## Overview
-This module enhances Flask applications using Flask OpenAPI and Pydantic by introducing structured error handling based on the [RFC 7807 Problem Details for HTTP APIs](https://datatracker.ietf.org/doc/html/rfc7807). It supports automatic validation error handling and provides detailed error responses, optionally including stack traces.
+This module enhances Flask (or Flask OpenAPI) applications introducing structured error handling based on the [RFC 7807 Problem Details for HTTP APIs](https://datatracker.ietf.org/doc/html/rfc7807). It supports automatic validation error handling and provides detailed error responses, optionally including stack traces.
 
 ---
 
@@ -9,6 +10,7 @@ This module enhances Flask applications using Flask OpenAPI and Pydantic by intr
 - **Problem Details Specification:** Conforms to the Problem Details for HTTP APIs standard.
 - **Automatic Error Handling:** Registers handlers for common exceptions like validation errors and server-side issues.
 - **Configurable Stack Traces:** Optionally include stack traces in error responses for easier debugging.
+- **Flask support:** The package support Flask and/or Flask OpenAPI 3 applications.
 
 ---
 
@@ -91,7 +93,7 @@ When an error occurs, the module returns a JSON response similar to:
 
 ### **Classes**
 1. **`ProblemDetails`**: A Pydantic model representing the structure of an error response.
-2. **`ProblemDetailsError`**: Custom exception class for handling problems.
+2. **`ProblemDetailsError`**: Exception class for handling problems.
 
 
 ### **Functions**
