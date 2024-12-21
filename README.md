@@ -88,6 +88,7 @@ When an error occurs, the module returns a JSON response similar to:
 - `configure_app(app_builder, with_traceback=False)`: Sets up the application with error handling.
 - `activate_traceback() / deactivate_traceback()`: Enable or disable traceback inclusion.
 - `from_exception(exception, extras)`: create a ProblemDetailsErrors from an exception.
+- `from_model(model)`: create a ProblemDetailsErrors from a ProblemDetails.
 
 
 ---
