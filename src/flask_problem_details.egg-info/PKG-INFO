@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: flask-problem-details
-Version: 1.0.3
+Version: 1.1.0
 Summary: A package that implements problem details errors in Flask App
 Author: Michelangelo Matina
 Classifier: Programming Language :: Python :: 3
@@ -102,6 +102,7 @@ When an error occurs, the module returns a JSON response similar to:
 - `configure_app(app_builder, with_traceback=False)`: Sets up the application with error handling.
 - `activate_traceback() / deactivate_traceback()`: Enable or disable traceback inclusion.
 - `from_exception(exception, extras)`: create a ProblemDetailsErrors from an exception.
+- `from_model(model)`: create a ProblemDetailsErrors from a ProblemDetails.
 
 
 ---

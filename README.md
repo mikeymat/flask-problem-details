@@ -69,9 +69,7 @@ When an error occurs, the module returns a JSON response similar to:
   "detail": "The method is not implemented",
   "type": "NotImplementedError",
   "traceback": "Traceback (most recent call last):...",
-  "extras": {
-    "one": "extra value"
-  }
+  "one": "extra value"
 }
 ```
 
