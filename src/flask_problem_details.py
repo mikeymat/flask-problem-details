@@ -1,7 +1,7 @@
 from __future__ import annotations
 from flask import Flask, Response
 from flask_openapi3 import OpenAPI
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, AnyUrl
 from werkzeug.exceptions import HTTPException, BadRequest, InternalServerError
 from typing import Union
 import traceback
@@ -73,34 +73,31 @@ def from_exception(exception: Exception, extras: dict = {}) -> ProblemDetailsErr
     
     :rtype ProblemDetailsError
     """
-    model = ProblemDetails(
+    problem = ProblemDetails(
         status=InternalServerError.code,
         title= InternalServerError.__name__,
         detail= str(exception),
-        type=exception.__class__.__name__,
         **extras
     )
     
     if isinstance(exception, HTTPException):
-        model.status = exception.code
-        model.title = exception.__class__.__name__
-        model.detail = exception.description
+        problem.status = exception.code
+        problem.title = exception.__class__.__name__
+        problem.detail = exception.description
     
-    return ProblemDetailsError(exception=exception, **model.model_dump())
-
-def from_model(model : ProblemDetails) -> ProblemDetailsError:
-    return ProblemDetailsError(**model.model_dump())
+    return ProblemDetailsError(problem=problem, exception=exception)
 
 class ProblemDetails(BaseModel, extra="allow"):
     status: int = Field(..., description = "HTTP status code")
-    title: str = Field(..., description = "A short, human-readable summary of the problem type")
-    detail: str = Field(..., description = "An human readable explanation specific to this occurrence of the problem")
-    type: str = Field(..., description = "An absolute URI that identifies the problem type")
+    title: str  = Field(..., description = "A short, human-readable summary of the problem type")
+    detail: Union[str|None]  = Field(None, description = "An human readable explanation specific to this occurrence of the problem")
+    type: Union[AnyUrl|None]  = Field(None, description = "An absolute URI that identifies the problem type")
+    instance: Union[AnyUrl|None] = Field(None, description = "An URI reference that identifies the specific occurence of the problem")
     traceback : Union[str|None] = Field(None, description = "The stack trace of the problem")
     
 class ProblemDetailsError(Exception):
 
-    def __init__(self, status: int = None, title: str = None, detail: str = None, type: str = None, exception : Exception = None, **kwargs):
+    def __init__(self, problem: ProblemDetails, exception: Exception = None):
         """
         ProblemDetails exception
 
@@ -116,8 +113,8 @@ class ProblemDetailsError(Exception):
                      present its value is assumed to be "about:blank".
         :type: type: str
         """
-        self.problem = ProblemDetails(status=status, title=title, detail=detail, type=type, **kwargs)
-        self.inner_exception : Exception = exception
+        self.problem: ProblemDetails = problem
+        self.inner_exception: Exception = exception
      
         
     def to_dict(self, with_traceback: bool = None) -> dict:
@@ -133,7 +130,7 @@ class ProblemDetailsError(Exception):
         
         if with_traceback:
             self.problem.traceback = traceback.format_exc()
-        return self.problem.model_dump()
+        return self.problem.model_dump(exclude_none=True)
     
     def to_json(self, with_traceback: bool = None) -> str:
         """
@@ -148,7 +145,7 @@ class ProblemDetailsError(Exception):
         
         if with_traceback:
             self.problem.traceback = traceback.format_exc()
-        return self.problem.model_dump_json()
+        return self.problem.model_dump_json(exclude_none=True)
 
     def to_http_response(self, with_traceback: bool = None) -> Response:
         with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback

@@ -25,7 +25,7 @@ pip install flask-problem-details
 
 ```python
 from flask_openapi3 import OpenAPI, Info
-from flask_problem_details import configure_app, from_exception
+from flask_problem_details import configure_app, from_exception, ProblemDetails, ProblemDetailsError
 from werkzeug.exceptions import NotImplemented
 
 # OpenAPI information
@@ -44,6 +44,12 @@ def get_books():
     extras : dict = {"one": "extra value"}
     raise from_exception(NotImplementedError(description), extras = extras)
 
+
+@app.get("/cats")
+def get_cats():
+    problem = ProblemDetails(status=412, title = "No shelter", type= "uri:localhost:noshelter")
+    raise ProblemDetailsError(problem)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
 ```
@@ -56,9 +62,7 @@ When an error occurs, the module returns a JSON response similar to:
   "status": 501,
   "title": "NotImplemented",
   "detail": "The server does not support the action requested by the browser.",
-  "type": "NotImplemented",
-  "traceback": "Traceback (most recent call last)...",
-  "extras": {}
+  "traceback": "Traceback (most recent call last):..."
 }
 ```
 #### GET /books
@@ -67,9 +71,17 @@ When an error occurs, the module returns a JSON response similar to:
   "status": 500,
   "title": "InternalServerError",
   "detail": "The method is not implemented",
-  "type": "NotImplementedError",
   "traceback": "Traceback (most recent call last):...",
   "one": "extra value"
+}
+```
+#### GET /cats
+```json
+{
+  "status": 412,
+  "title": "No shelter",
+  "type": "uri:localhost:noshelter",
+  "traceback": "Traceback (most recent call last):..."
 }
 ```
 
@@ -86,8 +98,6 @@ When an error occurs, the module returns a JSON response similar to:
 - `configure_app(app_builder, with_traceback=False)`: Sets up the application with error handling.
 - `activate_traceback() / deactivate_traceback()`: Enable or disable traceback inclusion.
 - `from_exception(exception, extras)`: create a ProblemDetailsErrors from an exception.
-- `from_model(model)`: create a ProblemDetailsErrors from a ProblemDetails.
-
 
 ---
 
