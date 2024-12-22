@@ -49,13 +49,8 @@ def get_books():
 
 @app.get("/cats")
 def get_cats():
-    raise ProblemDetailsError(
-        ProblemDetails(
-            status=412, 
-            title="No shelter", 
-            type= "uri:localhost:noshelter"
-        )
-    )
+   problem = ProblemDetails(status=412, title = "No shelter")
+   raise ProblemDetailsError(problem)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)

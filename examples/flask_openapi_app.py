@@ -23,13 +23,13 @@ def get_books():
 
 @app.get("/cats")
 def get_cats():
-    problem = ProblemDetails(status=412, title = "No shelter", type= "uri:localhost:noshelter")
+    problem = ProblemDetails(status=412, title = "No shelter")
     raise ProblemDetailsError(problem)
 
 class DogsQuery(BaseModel):
     id: int
 
-@app.get("/dogs")
+@app.post("/dogs")
 def get_dogs(query: DogsQuery):
     return { "id": query.id }
 

@@ -38,13 +38,13 @@ def configure_app(app: Union[Flask, Callable[[dict],OpenAPI]], with_traceback: b
     Union[Flask, OpenAPI]
         The configured Flask or OpenAPI application instance.
     """
-    def handle(problem: ProblemDetailsError) -> Response:
+    def handle(error: ProblemDetailsError) -> Response:
         """
         Handle a ProblemDetailsError and return an HTTP response.
 
         Parameters
         ----------
-        problem : ProblemDetailsError
+        error : ProblemDetailsError
             The raised problem.
 
         Returns
@@ -52,7 +52,7 @@ def configure_app(app: Union[Flask, Callable[[dict],OpenAPI]], with_traceback: b
         Response
             An HTTP response representing the problem details.
         """
-        return problem.to_http_response()
+        return error.problem.to_http_response()
     def handle_validation_error(error: ValidationError) -> Response:
         """
         Handle a ValidationError and return an HTTP response.
@@ -83,7 +83,7 @@ def configure_app(app: Union[Flask, Callable[[dict],OpenAPI]], with_traceback: b
         Response
             An HTTP response representing the exception details.
         """
-        return handle(problem=from_exception(exception))
+        return handle(from_exception(exception))
     
     if with_traceback:
         activate_traceback()
@@ -138,22 +138,6 @@ class ProblemDetails(BaseModel, extra="allow"):
     instance: Union[AnyUrl|None] = Field(None, description = "An URI reference that identifies the specific occurrence of the problem")
     traceback : Union[str|None] = Field(None, description = "The stack trace of the problem")
 
-class ProblemDetailsError(Exception):
-
-    def __init__(self, problem: ProblemDetails, exception: Exception = None):
-        """
-        Initialize a ProblemDetailsError.
-
-        Parameters
-        ----------
-        problem : ProblemDetails
-            The problem details.
-        exception : Exception, optional
-            The original exception that caused the problem (default is None).
-        """
-        self.problem: ProblemDetails = problem
-        self.inner_exception: Exception = exception
-
     def to_dict(self, with_traceback: bool = None) -> dict:
         """
         Transform the ProblemDetailsError into a dictionary.
@@ -168,12 +152,12 @@ class ProblemDetailsError(Exception):
         dict
             The problem details as a dictionary.
         """
-        with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback
-        
+        with_traceback: bool = WITH_TRACEBACK if with_traceback is None else with_traceback
+
         if with_traceback:
-            self.problem.traceback = traceback.format_exc()
-        return self.problem.model_dump(exclude_none=True)
-    
+            self.traceback = traceback.format_exc()
+        return self.model_dump(exclude_none=True)
+
     def to_json(self, with_traceback: bool = None) -> str:
         """
         Transform the ProblemDetailsError into a JSON string.
@@ -188,11 +172,11 @@ class ProblemDetailsError(Exception):
         str
             The problem details as a JSON string.
         """
-        with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback
-        
+        with_traceback: bool = WITH_TRACEBACK if with_traceback is None else with_traceback
+
         if with_traceback:
-            self.problem.traceback = traceback.format_exc()
-        return self.problem.model_dump_json(exclude_none=True)
+            self.traceback = traceback.format_exc()
+        return self.model_dump_json(exclude_none=True)
 
     def to_http_response(self, with_traceback: bool = None) -> Response:
         """
@@ -208,5 +192,22 @@ class ProblemDetailsError(Exception):
         Response
             The problem details as an HTTP response.
         """
-        with_traceback : bool = WITH_TRACEBACK if with_traceback is None else with_traceback
-        return Response(status=self.problem.status, response=self.to_json(with_traceback), mimetype="application/problem+json")
+        with_traceback: bool = WITH_TRACEBACK if with_traceback is None else with_traceback
+        return Response(status=self.status, response=self.to_json(with_traceback),
+                        mimetype="application/problem+json")
+
+class ProblemDetailsError(Exception):
+
+    def __init__(self, problem: ProblemDetails, exception: Exception = None):
+        """
+        Initialize a ProblemDetailsError.
+
+        Parameters
+        ----------
+        problem : ProblemDetails
+            The problem details.
+        exception : Exception, optional
+            The original exception that caused the problem (default is None).
+        """
+        self.problem: ProblemDetails = problem
+        self.inner_exception: Exception = exception
