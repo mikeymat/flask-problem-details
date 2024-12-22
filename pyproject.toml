@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flask-problem-details"
+version = "2.0.0"
+authors = [
+  { name="mikeymat" },
+]
+description = "A package that implements problem details errors in Flask App"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "flask-openapi3~=4.0.3",
+    "pydantic~=2.10.4",
+    "Flask~=3.1.0",
+    "Werkzeug~=3.1.3"
+]
+
+[project.urls]
+Homepage = "https://github.com/mikeymat/flask-problem-details"
+Issues = "https://github.com/mikeymat/flask-problem-details/issues"
